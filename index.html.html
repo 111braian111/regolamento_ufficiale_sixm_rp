@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="it" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REGOLAMENTO UFFICIALE — SIXM RP</title>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Three.js r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#08090c',
+                        charcoal: '#101218',
+                        slatecard: '#151821',
+                        goldaccent: '#f59e0b',
+                        amberlight: '#fbbf24',
+                        amberdeep: '#b45309',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulseSlow 4s ease-in-out infinite',
+                        'float-gentle': 'floatGentle 4.5s ease-in-out infinite',
+                        'scanline': 'scanline 8s linear infinite',
+                        'shimmer': 'shimmerSweep 2.6s infinite',
+                        'spin-slow': 'spin 14s linear infinite',
+                        'orbit-glow': 'orbitGlow 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseSlow: {
+                            '0%, 100%': { opacity: '0.45', transform: 'scale(1)' },
+                            '50%': { opacity: '0.85', transform: 'scale(1.06)' },
+                        },
+                        floatGentle: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-7px)' },
+                        },
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100vh)' },
+                        },
+                        shimmerSweep: {
+                            '0%': { transform: 'translateX(-150%) skewX(-20deg)' },
+                            '100%': { transform: 'translateX(260%) skewX(-20deg)' },
+                        },
+                        orbitGlow: {
+                            '0%, 100%': { boxShadow: '0 0 28px rgba(245, 158, 11, 0.22), inset 0 0 22px rgba(245, 158, 11, 0.06)' },
+                            '50%': { boxShadow: '0 0 46px rgba(245, 158, 11, 0.45), inset 0 0 32px rgba(88, 101, 242, 0.14)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Effetto 3D Tilt prospettico + Riflesso Olografico Dorato */
+        .tilt-card {
+            transform-style: preserve-3d;
+            transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .tilt-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(
+                650px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(245, 158, 11, 0.16),
+                rgba(217, 119, 6, 0.07) 40%,
+                transparent 70%
+            );
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .tilt-card:hover::before {
+            opacity: 1;
+        }
+        .tilt-card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Bordo cinetico oro/ambra & indigo */
+        .gold-border-glow {
+            background: linear-gradient(125deg, #fbbf24, #f59e0b, #5865F2, #fbbf24, #b45309);
+            background-size: 300% 300%;
+            animation: goldShift 4.5s ease infinite;
+            padding: 1.5px;
+        }
+        @keyframes goldShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Effetto lucido sui pulsanti */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.36), transparent);
+            animation: shimmerSweep 2.8s infinite;
+            pointer-events: none;
+        }
+
+        /* Animazione impulso radiale Discord */
+        @keyframes badgePulseRing {
+            0% { box-shadow: 0 0 0 0 rgba(88, 101, 242, 0.65); }
+            70% { box-shadow: 0 0 0 14px rgba(88, 101, 242, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(88, 101, 242, 0); }
+        }
+        .discord-pulse {
+            animation: badgePulseRing 2.2s infinite;
+        }
+
+        /* Effetto testo dorato animato */
+        .gold-text-shimmer {
+            background: linear-gradient(90deg, #fef3c7 0%, #fbbf24 30%, #ffffff 50%, #f59e0b 70%, #fef3c7 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: textShine 4s linear infinite;
+        }
+        @keyframes textShine {
+            to { background-position: 200% center; }
+        }
+
+        /* Animazioni entrata hero */
+        @keyframes heroRise {
+            0% { opacity: 0; transform: translateY(26px) scale(0.98); filter: blur(6px); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+        .hero-in-1 { animation: heroRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+        .hero-in-2 { animation: heroRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both; }
+        .hero-in-3 { animation: heroRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both; }
+        .hero-in-4 { animation: heroRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+
+        /* Scroll Reveal con effetto pop fluido */
+        .reveal-section {
+            opacity: 0;
+            transform: translateY(26px) scale(0.99);
+            transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-section.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Micro-animazione card singole al passaggio */
+        .rule-item {
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .rule-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px -10px rgba(245, 158, 11, 0.22);
+        }
+
+        /* Scrollbar nascosta per filtri orizzontali */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Barra di scorrimento principale personalizzata (Dark & Oro SIXM RP) */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #f59e0b #08090c;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #08090c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #fbbf24, #d97706);
+            border-radius: 9999px;
+            border: 2px solid #08090c;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #fde68a, #f59e0b);
+        }
+
+        /* Evidenziazione ricerca */
+        mark.search-hl {
+            background-color: rgba(245, 158, 11, 0.32);
+            color: #fef3c7;
+            padding: 0 3px;
+            border-radius: 4px;
+            border-bottom: 1px solid #f59e0b;
+        }
+    </style>
+</head>
+<body class="bg-[#08090c] text-slate-200 font-sans antialiased selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
+
+    <!-- Luci Ambientali Cinematografiche Dark & Oro/Ambra -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="absolute -top-44 -left-44 w-[480px] h-[480px] bg-amber-500/10 rounded-full blur-[130px] animate-pulse-slow"></div>
+        <div class="absolute top-1/2 -right-44 w-[520px] h-[520px] bg-amber-700/10 rounded-full blur-[150px] animate-pulse-slow"></div>
+        <div class="w-full h-[1.5px] bg-gradient-to-r from-transparent via-amber-400/20 to-transparent animate-scanline"></div>
+    </div>
+
+    <!-- Header / Barra di Navigazione Fissa -->
+    <header class="sticky top-0 z-40 bg-[#08090c]/85 backdrop-blur-xl border-b border-amber-500/15">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2 sm:gap-3">
+            
+            <!-- Brand SIXM RP -->
+            <a href="#" class="flex items-center gap-2.5 sm:gap-3 group focus:outline-none shrink-0">
+                <div class="relative w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-xl bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 p-[1.5px] shadow-[0_0_24px_rgba(245,158,11,0.35)] group-hover:shadow-[0_0_34px_rgba(245,158,11,0.65)] group-hover:scale-105 transition-all duration-300">
+                    <div class="w-full h-full bg-[#08090c] rounded-[10.5px] flex items-center justify-center relative overflow-hidden">
+                        <img src="image_5da123.jpg" alt="SixM Logo" onerror="this.style.display='none'" class="absolute inset-0 w-full h-full object-cover opacity-80">
+                        <!-- Logo vettoriale SixM (tramonto, palme e scritta SixM) -->
+                        <svg viewBox="0 0 100 100" class="relative z-10 w-full h-full" aria-label="Logo SixM">
+                            <defs>
+                                <linearGradient id="sixmSky" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#3b0764"/>
+                                    <stop offset="50%" stop-color="#db2777"/>
+                                    <stop offset="100%" stop-color="#f59e0b"/>
+                                </linearGradient>
+                                <linearGradient id="sixmText" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ec4899"/>
+                                    <stop offset="50%" stop-color="#f59e0b"/>
+                                    <stop offset="100%" stop-color="#fef08a"/>
+                                </linearGradient>
+                            </defs>
+                            <rect width="100" height="100" fill="url(#sixmSky)"/>
+                            <circle cx="50" cy="54" r="24" fill="#fde047" opacity="0.95"/>
+                            <!-- Sagome palme laterali -->
+                            <path d="M12 95 C14 68 18 50 22 34 M22 34 C12 30 6 35 3 41 M22 34 C15 24 7 25 4 29 M22 34 C29 26 36 29 39 35 M22 34 C31 33 36 39 37 45" stroke="#180828" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                            <path d="M88 95 C86 68 82 50 78 34 M78 34 C88 30 94 35 97 41 M78 34 C85 24 93 25 96 29 M78 34 C71 26 64 29 61 35 M78 34 C69 33 64 39 63 45" stroke="#180828" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                            <!-- Mare -->
+                            <rect x="0" y="74" width="100" height="26" fill="#1e1b4b" opacity="0.72"/>
+                            <ellipse cx="50" cy="82" rx="22" ry="3.5" fill="#fde047" opacity="0.65"/>
+                            <!-- Scritta stilizzata SixM -->
+                            <text x="50" y="61" text-anchor="middle" font-family="Inter, sans-serif" font-style="italic" font-weight="900" font-size="29" letter-spacing="-1" stroke="#09090b" stroke-width="5" paint-order="stroke" fill="url(#sixmText)">SixM</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <span class="font-black text-base sm:text-xl tracking-wider text-white whitespace-nowrap">SIXM <span class="text-amber-400">RP</span></span>
+                        <span class="hidden lg:inline-block text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/35 whitespace-nowrap">REGOLAMENTO</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400 hidden md:inline truncate">Server FiveM Roleplay Italiano</span>
+                </div>
+            </a>
+
+            <!-- Link Rapidi Desktop -->
+            <nav class="hidden xl:flex items-center gap-5 text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <a href="#sec-1" class="hover:text-amber-400 transition-colors">Filosofia</a>
+                <a href="#sec-2" class="hover:text-amber-400 transition-colors">Regole</a>
+                <a href="#sec-3" class="hover:text-amber-400 transition-colors">Rapine</a>
+                <a href="#sec-4" class="hover:text-amber-400 transition-colors">Inseguimenti</a>
+                <a href="#sec-5" class="hover:text-amber-400 transition-colors">Giustizia</a>
+                <a href="#sec-6" class="hover:text-amber-400 transition-colors">Fazioni</a>
+                <a href="#sec-7" class="hover:text-amber-400 transition-colors">FDO/EMS</a>
+                <a href="#sec-8" class="hover:text-amber-400 transition-colors">Sanzioni</a>
+            </nav>
+
+            <!-- Pulsanti Discord Ufficiale + Connessione Rapida FiveM -->
+            <div class="flex items-center gap-2 sm:gap-2.5 shrink-0 pr-1">
+                <!-- Pulsante Discord Ufficiale (solo icona) -->
+                <a 
+                    href="https://discord.gg/dWNcdusRd4" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] border border-indigo-300/30 text-white transition-all shadow-[0_0_20px_rgba(88,101,242,0.4)] hover:shadow-[0_0_30px_rgba(88,101,242,0.65)] hover:scale-105 active:scale-95"
+                    title="Entra nel server Discord ufficiale di SIXM RP"
+                    aria-label="Entra nel server Discord ufficiale di SIXM RP"
+                >
+                    <svg class="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189Z"/>
+                    </svg>
+                </a>
+
+                <!-- Pulsante Connessione Rapida FiveM -->
+                <button 
+                    type="button"
+                    onclick="copyServerConnect()"
+                    class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-xs font-mono font-bold text-amber-300 transition-all shadow-[0_0_20px_rgba(245,158,11,0.18)] hover:shadow-[0_0_28px_rgba(245,158,11,0.35)] active:scale-95 whitespace-nowrap"
+                    title="Clicca per copiare connect cfx.re/join/vqq7p6q"
+                >
+                    <i data-lucide="gamepad-2" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                    <span class="hidden lg:inline">cfx.re/join/vqq7p6q</span>
+                    <span class="lg:hidden">IP Server</span>
+                    <i data-lucide="copy" class="w-3.5 h-3.5 text-amber-400/80 shrink-0"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Prima Schermata / Hero Section con Scena 3D Three.js -->
+    <section class="relative overflow-hidden border-b border-amber-500/15 min-h-[540px] lg:min-h-[600px] flex items-center">
+        <!-- Artwork Ufficiale SixM come sfondo atmosferico discreto -->
+        <img 
+            src="image_5da123.jpg" 
+            alt="" 
+            onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='image_5da04c.jpg';}else{this.style.display='none';}"
+            class="absolute inset-0 z-0 w-full h-full object-cover object-center opacity-20 scale-105 pointer-events-none select-none"
+        >
+        <!-- Container Canvas 3D Three.js -->
+        <div id="three-hero-container" class="absolute inset-0 z-[1] pointer-events-none opacity-95"></div>
+        <!-- Sfumatura radiale di leggibilità -->
+        <div class="absolute inset-0 z-[2] bg-gradient-to-b from-[#08090c]/60 via-[#08090c]/75 to-[#08090c] pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 text-center w-full">
+            <!-- Badge Superiore -->
+            <div class="hero-in-1 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/35 text-amber-300 text-xs font-semibold tracking-wider uppercase mb-6 backdrop-blur-md shadow-[0_0_24px_rgba(245,158,11,0.18)]">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                <span>Community Roleplay Italiana • Alto Livello Narrativo</span>
+            </div>
+
+            <!-- Titolo Principale con Shimmer Dorato -->
+            <h1 class="hero-in-2 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1] mb-4">
+                REGOLAMENTO UFFICIALE — <span class="gold-text-shimmer">SIXM RP</span>
+            </h1>
+
+            <p class="hero-in-3 max-w-2xl mx-auto text-sm sm:text-base lg:text-lg text-slate-300 leading-relaxed mb-8">
+                La guida completa alle norme di comportamento, azioni criminali, inseguimenti, sistema giudiziario e gestione delle fazioni su <strong class="text-white">SIXM RP</strong>.
+            </p>
+
+            <!-- Avviso Obbligatorio Discord compatto e ultra-animato -->
+            <div class="hero-in-4 max-w-2xl mx-auto rounded-2xl gold-border-glow animate-orbit-glow tilt-card">
+                <div class="relative rounded-[14.5px] bg-[#0b0e16]/90 backdrop-blur-2xl p-6 sm:p-7 overflow-hidden">
+                    <!-- Linea laser animata superiore -->
+                    <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80"></div>
+
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-300 text-[11px] font-extrabold uppercase tracking-wider mb-3.5 animate-float-gentle">
+                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span>Requisito Obbligatorio per Giocare</span>
+                    </div>
+
+                    <p class="text-sm sm:text-base text-slate-200 leading-relaxed mb-6">
+                        <strong class="text-amber-300">REQUISITO OBBLIGATORIO:</strong> Per giocare su <strong class="text-white">SIXM RP</strong> è necessario entrare prima nel nostro server Discord ufficiale cliccando sull'icona Discord qui sotto!
+                    </p>
+
+                    <!-- Pulsanti CTA Hero: Solo icona Discord + Gioca Ora -->
+                    <div class="flex items-center justify-center gap-4">
+                        <a 
+                            href="https://discord.gg/dWNcdusRd4" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            aria-label="Entra su Discord Ufficiale"
+                            title="Entra su Discord Ufficiale"
+                            class="discord-pulse btn-shine inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#5865F2] hover:bg-[#4752C4] text-white border border-indigo-300/50 shadow-[0_0_28px_rgba(88,101,242,0.55)] hover:scale-110 hover:-rotate-3 active:scale-95 transition-all"
+                        >
+                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189Z"/>
+                            </svg>
+                        </a>
+
+                        <a 
+                            href="fivem://connect/cfx.re/join/vqq7p6q"
+                            class="btn-shine inline-flex items-center justify-center gap-2.5 h-14 px-8 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm sm:text-base shadow-[0_0_32px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all"
+                            title="Avvia FiveM e connettiti a SIXM RP"
+                        >
+                            <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                            <span>Gioca Ora</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Barra di Ricerca Istantanea & Filtri Rapidi -->
+    <section class="sticky top-20 z-30 bg-[#08090c]/90 backdrop-blur-xl border-b border-slate-800/80 py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+                <!-- Input Ricerca Live -->
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 text-amber-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input 
+                        type="text" 
+                        id="rule-search" 
+                        placeholder="Cerca nel regolamento (es. Metagaming, Ostaggi, PIT, Grappler, Permajail, EMS, Safe Zone)..."
+                        class="w-full pl-11 pr-24 py-3 rounded-xl bg-[#10131c] border border-amber-500/25 focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 text-sm text-white placeholder-slate-400 outline-none transition-all"
+                    >
+                    <button 
+                        type="button" 
+                        id="clear-search"
+                        onclick="resetFilters()"
+                        class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 transition-colors"
+                    >
+                        Reset
+                    </button>
+                </div>
+
+                <!-- Contatore Risultati -->
+                <div class="flex items-center justify-between md:justify-end gap-3 text-xs text-slate-400 font-mono px-1">
+                    <span id="results-counter">8 Sezioni Attive</span>
+                </div>
+            </div>
+
+            <!-- Pulsanti Filtro per le 8 Sezioni -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1" id="section-filters">
+                <button type="button" data-filter="all" class="filter-btn active shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition-all">Tutte (8)</button>
+                <button type="button" data-filter="sec-1" class="filter-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#121622] text-slate-300 hover:text-amber-300 border border-slate-800 transition-all">1. Filosofia</button>
+                <button type="button" data-filter="sec-2" class="filter-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#121622] text-slate-300 hover:text-amber-300 border border-slate-800 transition-all">2. Regole RP</button>
+                <button type="button" data-filter="sec-3" class="filter-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#121622] text-slate-300 hover:text-amber-300 border border-slate-800 transition-all">3. Rapine & Ostaggi</button>
+                <button type="button" data-filter="sec-4" class="filter-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#121622] text-slate-300 hover:text-amber-300 border border-slate-800 transition-all">4. Inseguimenti</button>
+                <button type="button" data-filter="sec-5" class="filter-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#121622] text-slate-300 hover:text-amber-300 border border-slate-800 transition-all">5. Giustizia & Permajail</button>
+                <button type="button" data-filter="sec-6" class="filter-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#121622] text-slate-300 hover:text-amber-300 border border-slate-800 transition-all">6. Fazioni</button>
+                <button type="button" data-filter="sec-7" class="filter-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#121622] text-slate-300 hover:text-amber-300 border border-slate-800 transition-all">7. FDO & Medici</button>
+                <button type="button" data-filter="sec-8" class="filter-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#121622] text-slate-300 hover:text-amber-300 border border-slate-800 transition-all">8. Sanzioni</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contenuto Principale: Tutte le 8 Sezioni Ufficiali -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12" id="rules-container">
+
+        <!-- Stato Nessun Risultato -->
+        <div id="empty-state" class="hidden text-center py-16 px-4 rounded-2xl bg-[#10131c] border border-amber-500/20">
+            <i data-lucide="search-x" class="w-12 h-12 text-amber-400 mx-auto mb-3"></i>
+            <h3 class="text-lg font-bold text-white mb-1">Nessuna regola trovata</h3>
+            <p class="text-sm text-slate-400 mb-4">Prova a cercare un altro termine oppure ripristina tutti i filtri del regolamento.</p>
+            <button type="button" onclick="resetFilters()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all">Mostra Tutto il Regolamento</button>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- SEZIONE 1: Filosofia del Server e Livello di Gioco        -->
+        <!-- ========================================================= -->
+        <section id="sec-1" data-section="sec-1" class="rule-section reveal-section scroll-mt-44 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center font-mono font-black text-amber-400">01</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Filosofia del Server e Livello di Gioco</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Identità narrativa, realismo interpretativo e rispetto reciproco</p>
+                </div>
+            </div>
+
+            <div class="tilt-card rounded-2xl bg-[#10131c]/95 border border-amber-500/20 p-6 sm:p-8 shadow-xl">
+                <p class="searchable-text text-sm sm:text-base text-slate-200 leading-relaxed mb-6 pb-5 border-b border-slate-800">
+                    <strong class="text-amber-300">SixM RP</strong> è una community Roleplay italiana orientata a un'esperienza di alto livello narrativo e interpretativo. L'obiettivo principale di ogni giocatore deve essere la creazione di storie coinvolgenti, realistiche e coerenti con il proprio personaggio.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800/90 hover:border-amber-500/40 p-5 transition-colors">
+                        <div class="flex items-center gap-2.5 mb-2.5">
+                            <i data-lucide="crosshair" class="w-5 h-5 text-rose-400"></i>
+                            <h3 class="searchable-text font-bold text-white text-base">Divieto di "Spara-Spara"</h3>
+                        </div>
+                        <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                            Il server non è un deathmatch. Le sparatorie devono essere l'ultima risorsa e la conseguenza logica di una scena RP ben costruita.
+                        </p>
+                    </div>
+
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800/90 hover:border-amber-500/40 p-5 transition-colors">
+                        <div class="flex items-center gap-2.5 mb-2.5">
+                            <i data-lucide="users" class="w-5 h-5 text-amber-400"></i>
+                            <h3 class="searchable-text font-bold text-white text-base">Divieto di Self-RP</h3>
+                        </div>
+                        <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                            È vietato giocare in solitaria ("farmare" o svolgere azioni ripetute senza interagire con gli altri giocatori) escludendosi dalle dinamiche sociali del server. Il Roleplay si costruisce insieme agli altri player.
+                        </p>
+                    </div>
+
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800/90 hover:border-amber-500/40 p-5 transition-colors">
+                        <div class="flex items-center gap-2.5 mb-2.5">
+                            <i data-lucide="handshake" class="w-5 h-5 text-emerald-400"></i>
+                            <h3 class="searchable-text font-bold text-white text-base">Buon Senso e Fair Play</h3>
+                        </div>
+                        <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                            Il rispetto reciproco tra giocatori e verso lo Staff è fondamentale. Non bisogna mai rovinare l'esperienza altrui per il solo scopo di "vincere" un'azione.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEZIONE 2: Regole Generali del Roleplay                   -->
+        <!-- ========================================================= -->
+        <section id="sec-2" data-section="sec-2" class="rule-section reveal-section scroll-mt-44 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center font-mono font-black text-amber-400">02</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Regole Generali del Roleplay</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Fondamenti obbligatori per ogni cittadino di SIXM RP</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Metagaming -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.1</span> Metagaming (MG)
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">SEVERAMENTE VIETATO</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        È severamente vietato utilizzare informazioni apprese al di fuori del gioco (stream, Discord, forum, chat vocali esterne) per avvantaggiare il proprio personaggio in game.
+                    </p>
+                </div>
+
+                <!-- Powergaming -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.2</span> Powergaming (PG)
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">VIETATO</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        È vietato compiere azioni fisicamente impossibili nella realtà o forzare le azioni sugli altri giocatori senza lasciare loro possibilità di replica o reazione (es. guidare su montagne ripide con una supercar, non simulare il dolore dopo un grave incidente, legare qualcuno senza dargli modo di reagire).
+                    </p>
+                </div>
+
+                <!-- RDM -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.3</span> Random Deathmatch (RDM)
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">VIETATO</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        È vietato uccidere o attaccare altri giocatori senza una valida e solida motivazione Roleplay costruita in precedenza.
+                    </p>
+                </div>
+
+                <!-- VDM -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.4</span> Vehicle Deathmatch (VDM)
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">VIETATO</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        È vietato utilizzare qualsiasi veicolo come arma per investire volontariamente altri giocatori.
+                    </p>
+                </div>
+
+                <!-- NVL -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.5</span> No Value of Life (NVL / Valorizzazione della Vita)
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">OBBLIGATORIO</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        Ogni giocatore deve sempre temere per la propria vita e per quella degli altri, comportandosi come farebbe nella realtà in situazioni di pericolo (es. non reagire estraendo un'arma mentre si è già sotto tiro da più persone).
+                    </p>
+                </div>
+
+                <!-- Fail RP -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.6</span> Fail RP
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">VIETATO</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        Qualsiasi comportamento irrealistico, incoerente con la situazione o che rompe l'immersione del contesto RP (es. parlare normalmente da feriti gravi, ignorare le ferite dopo un conflitto a fuoco).
+                    </p>
+                </div>
+
+                <!-- Combat Log -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.7</span> Combat Log
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">SEVERAMENTE VIETATO</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        È severamente vietato disconnettersi dal server durante un'azione RP attiva, un inseguimento, una rapina o un arresto per evitare le conseguenze.
+                    </p>
+                </div>
+
+                <!-- Revenge Kill e NLR -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.8</span> Revenge Kill e New Life Rule (NLR)
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">REGOLA VITA</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        Se il personaggio viene atterrato e rianimato dai medici, deve simulare lo shock e il trauma; se invece subisce il respawn in ospedale ("coma/morte clinica"), dimentica gli eventi che hanno portato alla sua morte e non può tornare sul luogo dell'azione né vendicarsi.
+                    </p>
+                </div>
+
+                <!-- Safe Zone -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.9</span> Safe Zone (Zone Sicure)
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">AREE PROTETTE</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        Ospedali, centrali di polizia, concessionari e zone di spawn sono considerati aree protette dove è vietato compiere atti criminali, rapimenti o sparatorie, salvo autorizzazione dello Staff o prosecuzione diretta di un'azione già avviata altrove.
+                    </p>
+                </div>
+
+                <!-- Uso del /me e /do -->
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-5 sm:p-6">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <h3 class="searchable-text font-extrabold text-white text-base flex items-center gap-2">
+                            <span class="text-amber-400 font-mono text-xs">2.10</span> Uso del /me e /do
+                        </h3>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">OBBLIGATORIO</span>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        È obbligatorio utilizzare i comandi <code class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 font-mono text-xs">/me</code> (per descrivere azioni non visibili tramite animazioni) e <code class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 font-mono text-xs">/do</code> (per descrivere lo stato ambientale o fisico del personaggio in modo sempre veritiero).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEZIONE 3: Regolamento Rapine e Azioni Criminali          -->
+        <!-- ========================================================= -->
+        <section id="sec-3" data-section="sec-3" class="rule-section reveal-section scroll-mt-44 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center font-mono font-black text-amber-400">03</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Regolamento Rapine e Azioni Criminali</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Limiti numerici ufficiali, contrattazione e tutela degli ostaggi</p>
+                </div>
+            </div>
+
+            <div class="tilt-card rounded-2xl bg-[#10131c]/95 border border-amber-500/20 p-6 sm:p-8 space-y-8 shadow-xl">
+                <!-- Tabella Limiti Numerici Partecipanti -->
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <h3 class="text-lg font-extrabold text-amber-300 flex items-center gap-2">
+                            <i data-lucide="users-round" class="w-5 h-5 text-amber-400"></i>
+                            <span>Limiti Numerici Partecipanti</span>
+                        </h3>
+                        <span class="text-xs text-slate-400">Equilibrio obbligatorio tra Criminali e Forze dell'Ordine (FDO)</span>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-[#0a0c12] border-b border-amber-500/25 text-xs uppercase tracking-wider text-amber-300 font-mono">
+                                    <th class="py-3.5 px-4">Tipologia Azione</th>
+                                    <th class="py-3.5 px-4">Criminali (Min - Max)</th>
+                                    <th class="py-3.5 px-4">Polizia / FDO (Min - Max)</th>
+                                    <th class="py-3.5 px-4">Note Aggiuntive</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/80 text-sm">
+                                <tr class="rule-item hover:bg-amber-500/5 transition-colors">
+                                    <td class="searchable-text py-4 px-4 font-bold text-white">Rapina al Negozietto</td>
+                                    <td class="searchable-text py-4 px-4 font-mono text-amber-300 font-semibold">Min 1 – Max 3</td>
+                                    <td class="searchable-text py-4 px-4 font-mono text-sky-300 font-semibold">Min 2 – Max 3</td>
+                                    <td class="searchable-text py-4 px-4 text-slate-300">Azione rapida; non è consentito l'uso di armi pesanti.</td>
+                                </tr>
+                                <tr class="rule-item hover:bg-amber-500/5 transition-colors">
+                                    <td class="searchable-text py-4 px-4 font-bold text-white">Rapina in Banca</td>
+                                    <td class="searchable-text py-4 px-4 font-mono text-amber-300 font-semibold">Min 2 – Max 4</td>
+                                    <td class="searchable-text py-4 px-4 font-mono text-sky-300 font-semibold">Min 2 – Max 4</td>
+                                    <td class="searchable-text py-4 px-4 text-slate-300">Richiede pianificazione e contrattazione obbligatoria.</td>
+                                </tr>
+                                <tr class="rule-item hover:bg-amber-500/5 transition-colors">
+                                    <td class="searchable-text py-4 px-4 font-bold text-white">Campi di Marijuana</td>
+                                    <td class="searchable-text py-4 px-4 font-mono text-amber-300 font-semibold">Min 2 – Max 4 (per fazione)</td>
+                                    <td class="searchable-text py-4 px-4 font-mono text-sky-300 font-semibold">Min 3 – Max 4</td>
+                                    <td class="searchable-text py-4 px-4 text-slate-300">Limite valido per singola fazione coinvolta nella zona.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Gestione Ostaggi, Contrattazione e Fuoco -->
+                <div>
+                    <h3 class="text-lg font-extrabold text-amber-300 flex items-center gap-2 mb-4">
+                        <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400"></i>
+                        <span>Gestione Ostaggi, Contrattazione e Fuoco</span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5">
+                            <h4 class="searchable-text font-bold text-white text-sm uppercase tracking-wide mb-2 text-emerald-300">• Tutela dell'Ostaggio</h4>
+                            <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                                Se i criminali detengono uno o più ostaggi durante una rapina, le Forze dell'Ordine non possono effettuare irruzioni né compiere mosse azzardate che mettano a rischio l'incolumità degli ostaggi.
+                            </p>
+                        </div>
+
+                        <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5">
+                            <h4 class="searchable-text font-bold text-white text-sm uppercase tracking-wide mb-2 text-rose-300">• Eccezione all'Irruzione</h4>
+                            <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                                La Polizia è autorizzata a intervenire con la forza/irruzione immediata solo ed esclusivamente nel caso in cui i criminali aprano il fuoco contro un ostaggio o lo feriscano.
+                            </p>
+                        </div>
+
+                        <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5">
+                            <h4 class="searchable-text font-bold text-white text-sm uppercase tracking-wide mb-2 text-amber-300">• Svolgimento e Ingaggio</h4>
+                            <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                                Una volta conclusa la fase di contrattazione e avviato l'inseguimento (a seguito della fuga dei criminali), le Forze dell'Ordine sono autorizzate ad aprire il fuoco anche senza che siano stati i criminali a sparare per primi, seguendo le regole d'ingaggio e di inseguimento.
+                            </p>
+                        </div>
+
+                        <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5">
+                            <h4 class="searchable-text font-bold text-white text-sm uppercase tracking-wide mb-2 text-rose-400">• Ostaggi Finti</h4>
+                            <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                                È severamente vietato utilizzare amici o membri della propria fazione come "ostaggi complici".
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEZIONE 4: Regolamento Inseguimenti e Manovre             -->
+        <!-- ========================================================= -->
+        <section id="sec-4" data-section="sec-4" class="rule-section reveal-section scroll-mt-44 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center font-mono font-black text-amber-400">04</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Regolamento Inseguimenti e Manovre</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Scansione temporale degli Alt, manovre PIT e utilizzo del Grappler</p>
+                </div>
+            </div>
+
+            <div class="tilt-card rounded-2xl bg-[#10131c]/95 border border-amber-500/20 p-6 sm:p-8 space-y-7 shadow-xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p class="searchable-text text-sm text-slate-300">
+                        Durante gli inseguimenti veicolari, le Forze dell'Ordine devono attenersi rigorosamente alla seguente scansione temporale prima di impiegare manovre di arresto forzato:
+                    </p>
+                    <button 
+                        type="button" 
+                        id="simulate-alt-btn"
+                        onclick="simulateAltSequence()"
+                        class="btn-shine shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-300 text-xs font-bold uppercase tracking-wider transition-all"
+                    >
+                        <i data-lucide="timer" class="w-4 h-4"></i>
+                        <span>Simula Sequenza Alt</span>
+                    </button>
+                </div>
+
+                <!-- Barra di Avanzamento Simulazione Alt -->
+                <div class="rounded-xl bg-[#0a0c12] border border-slate-800/90 p-4 space-y-2.5">
+                    <div class="flex items-center justify-between text-xs font-mono">
+                        <span id="alt-status-label" class="text-slate-400">Premi <strong class="text-amber-300">"Simula Sequenza Alt"</strong> per avviare la scansione temporale</span>
+                        <span id="alt-timer-badge" class="px-2.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-amber-300 font-bold">00:00 / 01:00</span>
+                    </div>
+                    <div class="relative h-3 w-full rounded-full bg-slate-900 overflow-hidden border border-slate-800">
+                        <div id="alt-progress-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-rose-500 shadow-[0_0_16px_rgba(245,158,11,0.75)] transition-all duration-500 ease-out"></div>
+                    </div>
+                    <div class="grid grid-cols-4 text-[11px] font-mono text-slate-500 pt-0.5">
+                        <span id="alt-tick-1" class="transition-colors">00:10 • ALT 1</span>
+                        <span id="alt-tick-2" class="text-center transition-colors">00:25 • ALT 2</span>
+                        <span id="alt-tick-3" class="text-center transition-colors">00:40 • ALT 3</span>
+                        <span id="alt-tick-4" class="text-right transition-colors">01:00 • PIT / GRAPPLER</span>
+                    </div>
+                </div>
+
+                <!-- Timeline Interattiva Alt 1 -> Alt 2 -> Alt 3 -> PIT/Grappler -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="alt-timeline">
+                    <div data-step="1" class="alt-step rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">FASE 1 • +10s</span>
+                            <span class="font-mono text-xs text-slate-500">00:10</span>
+                        </div>
+                        <h3 class="searchable-text font-extrabold text-white text-base mb-1.5">1. Alt 1</h3>
+                        <p class="searchable-text text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Va intimato dopo <strong class="text-amber-300">10 secondi</strong> dall'inizio effettivo dell'inseguimento.
+                        </p>
+                    </div>
+
+                    <div data-step="2" class="alt-step rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">FASE 2 • +15s</span>
+                            <span class="font-mono text-xs text-slate-500">00:25</span>
+                        </div>
+                        <h3 class="searchable-text font-extrabold text-white text-base mb-1.5">2. Alt 2</h3>
+                        <p class="searchable-text text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Va intimato dopo ulteriori <strong class="text-amber-300">15 secondi</strong> dal primo Alt.
+                        </p>
+                    </div>
+
+                    <div data-step="3" class="alt-step rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">FASE 3 • +15s</span>
+                            <span class="font-mono text-xs text-slate-500">00:40</span>
+                        </div>
+                        <h3 class="searchable-text font-extrabold text-white text-base mb-1.5">3. Alt 3</h3>
+                        <p class="searchable-text text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Va intimato dopo ulteriori <strong class="text-amber-300">15 secondi</strong> dal secondo Alt.
+                        </p>
+                    </div>
+
+                    <div data-step="4" class="alt-step rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">FASE 4 • +20s</span>
+                            <span class="font-mono text-xs text-slate-500">01:00</span>
+                        </div>
+                        <h3 class="searchable-text font-extrabold text-white text-base mb-1.5">4. Autorizzazione Manovre (PIT / Grappler)</h3>
+                        <p class="searchable-text text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Trascorsi <strong class="text-rose-300">20 secondi</strong> dall'intimazione dell'Alt 3, la Polizia può decidere se effettuare una manovra <strong class="text-white">PIT</strong> con il veicolo o utilizzare il <strong class="text-white">Grappler</strong> (se in dotazione sul mezzo).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Regole sulle Manovre -->
+                <div class="rounded-xl bg-[#0a0c12] border border-slate-800 p-5 space-y-3">
+                    <h4 class="font-bold text-amber-300 text-sm uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="car-front" class="w-4 h-4"></i>
+                        <span>Regole sulle Manovre</span>
+                    </h4>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="rule-item searchable-text flex items-start gap-2.5">
+                            <span class="text-amber-400 font-bold">•</span>
+                            <span>Le manovre PIT devono essere controllate, realistiche e non esagerate (è vietato speronare ad altissima velocità, su ponti, precipizi o in modo da causare ribaltamenti mortali irrealistici).</span>
+                        </li>
+                        <li class="rule-item searchable-text flex items-start gap-2.5">
+                            <span class="text-amber-400 font-bold">•</span>
+                            <span>Sia i criminali che le FDO devono guidare in modo coerente con la tipologia del veicolo utilizzato (no fuoristrada estremo con auto sportive).</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEZIONE 5: Sistema Giudiziario, Processi e Permajail      -->
+        <!-- ========================================================= -->
+        <section id="sec-5" data-section="sec-5" class="rule-section reveal-section scroll-mt-44 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center font-mono font-black text-amber-400">05</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Sistema Giudiziario, Processi e Permajail (Pena di Morte)</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Indagini approfondite, prove documentate e garanzie processuali</p>
+                </div>
+            </div>
+
+            <div class="tilt-card rounded-2xl bg-[#10131c]/95 border border-amber-500/20 p-6 sm:p-8 shadow-xl space-y-6">
+                <p class="searchable-text text-sm sm:text-base text-slate-200 leading-relaxed">
+                    Il sistema giudiziario di <strong class="text-amber-300">SixM RP</strong> premia le indagini approfondite, la raccolta di prove e il Roleplay investigativo tra criminali, polizia, avvocati e magistratura.
+                </p>
+
+                <!-- Tracker Interattivo Soglia 5 Reati Gravi -->
+                <div class="rounded-xl bg-[#0a0c12] border border-amber-500/25 p-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <span class="text-xs font-mono uppercase tracking-wider text-amber-400">Soglia Processo Permajail / Pena di Morte</span>
+                            <h4 class="font-bold text-white text-sm sm:text-base">Simulatore Fedina Penale (Minimo 5 Reati Gravi Documentati)</h4>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="adjustCrimes(-1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold">-</button>
+                            <span id="crime-count-badge" class="font-mono text-xs px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">5 / 5 Reati Gravi</span>
+                            <button type="button" onclick="adjustCrimes(1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold">+</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-5 gap-2 mb-3" id="crime-bars">
+                        <div class="h-2.5 rounded-full bg-amber-500 transition-all"></div>
+                        <div class="h-2.5 rounded-full bg-amber-500 transition-all"></div>
+                        <div class="h-2.5 rounded-full bg-amber-500 transition-all"></div>
+                        <div class="h-2.5 rounded-full bg-amber-500 transition-all"></div>
+                        <div class="h-2.5 rounded-full bg-rose-500 transition-all"></div>
+                    </div>
+                    <p id="crime-status-text" class="text-xs font-mono text-rose-300">
+                        SOGLIA RAGGIUNTA (≥ 5 reati gravi provati in RP): È possibile avviare il processo per Permajail / Pena di Morte.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5">
+                        <h3 class="searchable-text font-bold text-amber-300 text-base mb-2 flex items-center gap-2">
+                            <i data-lucide="gavel" class="w-4 h-4"></i>
+                            <span>Requisiti per Permajail / Pena di Morte</span>
+                        </h3>
+                        <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                            Per poter avviare un processo finalizzato all'ergastolo definitivo (Permajail), alla pena di morte o all'eliminazione definitiva del personaggio tramite via giudiziaria, l'imputato deve avere accumulato <strong class="text-white">minimo 5 reati gravi (o più)</strong> documentati e provati in RP.
+                        </p>
+                    </div>
+
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-slate-800 p-5">
+                        <h3 class="searchable-text font-bold text-emerald-300 text-base mb-2 flex items-center gap-2">
+                            <i data-lucide="scale" class="w-4 h-4"></i>
+                            <span>Diritto alla Difesa</span>
+                        </h3>
+                        <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                            Ogni imputato ha diritto a un regolare processo con avvocato difensore e presentazione delle prove raccolte dalle Forze dell'Ordine.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEZIONE 6: Regolamento Fazioni e Criminalità              -->
+        <!-- ========================================================= -->
+        <section id="sec-6" data-section="sec-6" class="rule-section reveal-section scroll-mt-44 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center font-mono font-black text-amber-400">06</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Regolamento Fazioni e Criminalità</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Coerenza narrativa, divieto di alleanze fisse e gestione dei conflitti</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-6">
+                    <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3">
+                        <i data-lucide="crown" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="searchable-text font-bold text-white text-base mb-2">Creazione e Riconoscimento</h3>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        Le fazioni criminali devono presentare un background solido e mantenere una coerenza narrativa nel tempo.
+                    </p>
+                </div>
+
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-6">
+                    <div class="w-9 h-9 rounded-lg bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-3">
+                        <i data-lucide="ban" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="searchable-text font-bold text-white text-base mb-2">Alleanze</h3>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        Sono vietate alleanze fisse tra più fazioni per aggirare i limiti numerici delle azioni (es. 4 membri di una fazione + 4 di un'altra nello stesso campo o rapina).
+                    </p>
+                </div>
+
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-6">
+                    <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3">
+                        <i data-lucide="swords" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="searchable-text font-bold text-white text-base mb-2">Conflitti tra Fazioni</h3>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        Le guerre tra gruppi criminali devono nascere da motivazioni IC (In Character) concrete e devono risolversi tramite accordi, rapimenti o conflitti mirati, evitando faide infinite basate sul solo scontro a fuoco.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEZIONE 7: Regolamento Forze dell'Ordine e Medici (EMS)   -->
+        <!-- ========================================================= -->
+        <section id="sec-7" data-section="sec-7" class="rule-section reveal-section scroll-mt-44 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center font-mono font-black text-amber-400">07</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Regolamento Forze dell'Ordine e Medici (EMS)</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Integrità istituzionale e neutralità assoluta del personale sanitario</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-6">
+                    <div class="flex items-center gap-2.5 mb-3">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-sky-400"></i>
+                        <h3 class="searchable-text font-bold text-white text-base">Corruzione</h3>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        È severamente vietato ai membri delle Forze dell'Ordine e dello Staff Medico essere corrotti, passare armi o informazioni riservate ai criminali, salvo specifica ed eccezionale autorizzazione scritta dallo Staff per motivi di trama.
+                    </p>
+                </div>
+
+                <div class="rule-item tilt-card rounded-2xl bg-[#10131c]/95 border border-slate-800 hover:border-amber-500/40 p-6">
+                    <div class="flex items-center gap-2.5 mb-3">
+                        <i data-lucide="heart-pulse" class="w-5 h-5 text-rose-400"></i>
+                        <h3 class="searchable-text font-bold text-white text-base">Comportamento dei Medici</h3>
+                    </div>
+                    <p class="searchable-text text-sm text-slate-300 leading-relaxed">
+                        I medici sono figure neutrali. È vietato rapirli, derubarli o impedirgli di prestare soccorso al termine di un'azione.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEZIONE 8: Sanzioni e Provvedimenti dello Staff           -->
+        <!-- ========================================================= -->
+        <section id="sec-8" data-section="sec-8" class="rule-section reveal-section scroll-mt-44 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center font-mono font-black text-amber-400">08</span>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Sanzioni e Provvedimenti dello Staff</h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Scala disciplinare proporzionata alla gravità e alla recidiva</p>
+                </div>
+            </div>
+
+            <div class="tilt-card rounded-2xl bg-[#10131c]/95 border border-amber-500/20 p-6 sm:p-8 shadow-xl space-y-6">
+                <p class="searchable-text text-sm text-slate-300">
+                    La violazione delle norme sopra indicate comporterà sanzioni proporzionate alla gravità dell'infrazione e alla recidiva del giocatore:
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-sky-500/30 p-5">
+                        <span class="text-[11px] font-mono font-bold text-sky-400 uppercase">Livello 1</span>
+                        <h3 class="searchable-text font-extrabold text-white text-base mt-1 mb-2">Richiamo Verbale / Note sul profilo</h3>
+                        <p class="searchable-text text-xs text-slate-400">Avvertimento ufficiale dello Staff e annotazione sullo storico del giocatore.</p>
+                    </div>
+
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-amber-500/35 p-5">
+                        <span class="text-[11px] font-mono font-bold text-amber-400 uppercase">Livello 2</span>
+                        <h3 class="searchable-text font-extrabold text-white text-base mt-1 mb-2">Jail Admin</h3>
+                        <p class="searchable-text text-xs text-slate-400">Tempo di detenzione amministrativa per infrazioni al regolamento RP.</p>
+                    </div>
+
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-orange-500/40 p-5">
+                        <span class="text-[11px] font-mono font-bold text-orange-400 uppercase">Livello 3</span>
+                        <h3 class="searchable-text font-extrabold text-white text-base mt-1 mb-2">Ban Temporaneo</h3>
+                        <p class="searchable-text text-xs text-slate-400">Sospensione dall'accesso al server <strong class="text-slate-200">da 24 ore a 30 giorni</strong>.</p>
+                    </div>
+
+                    <div class="rule-item rounded-xl bg-[#0a0c12] border border-rose-500/45 p-5">
+                        <span class="text-[11px] font-mono font-bold text-rose-400 uppercase">Livello 4</span>
+                        <h3 class="searchable-text font-extrabold text-white text-base mt-1 mb-2">Ban Permanente</h3>
+                        <p class="searchable-text text-xs text-slate-400">Per <strong class="text-slate-200">cheat, exploit, tossicità grave o reiterati Fail RP / Spara-Spara</strong>.</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 flex items-start gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+                    <p class="searchable-text text-xs sm:text-sm text-amber-100/90 leading-relaxed">
+                        Lo Staff di <strong>SixM RP</strong> si riserva il diritto di aggiornare il presente regolamento in qualsiasi momento per garantire la migliore esperienza di gioco possibile.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer con Crediti Developer -->
+    <footer class="relative z-10 bg-[#06070a] border-t border-amber-500/15 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <!-- Info SIXM RP -->
+                <div class="flex items-center gap-3 text-center md:text-left">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 p-[1.5px] overflow-hidden">
+                        <div class="w-full h-full bg-[#08090c] rounded-[10.5px] flex items-center justify-center overflow-hidden">
+                            <svg viewBox="0 0 100 100" class="w-full h-full" aria-label="Logo SixM">
+                                <rect width="100" height="100" fill="url(#sixmSky)"/>
+                                <circle cx="50" cy="54" r="24" fill="#fde047" opacity="0.95"/>
+                                <path d="M12 95 C14 68 18 50 22 34 M22 34 C12 30 6 35 3 41 M22 34 C29 26 36 29 39 35" stroke="#180828" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                                <path d="M88 95 C86 68 82 50 78 34 M78 34 C88 30 94 35 97 41 M78 34 C71 26 64 29 61 35" stroke="#180828" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                                <rect x="0" y="74" width="100" height="26" fill="#1e1b4b" opacity="0.72"/>
+                                <text x="50" y="61" text-anchor="middle" font-family="Inter, sans-serif" font-style="italic" font-weight="900" font-size="29" letter-spacing="-1" stroke="#09090b" stroke-width="5" paint-order="stroke" fill="url(#sixmText)">SixM</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="font-black text-white tracking-wide">REGOLAMENTO UFFICIALE — <span class="text-amber-400">SIXM RP</span></div>
+                        <div class="text-xs text-slate-400">Community Roleplay Italiana • Entra prima su Discord per accedere al server</div>
+                    </div>
+                </div>
+
+                <!-- Collegamenti Ufficiali SIXM RP -->
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <a 
+                        href="https://discord.gg/dWNcdusRd4" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(88,101,242,0.35)]"
+                    >
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189Z"/>
+                        </svg>
+                        <span>Discord Ufficiale SIXM RP</span>
+                    </a>
+
+                    <button 
+                        type="button"
+                        onclick="copyServerConnect()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 font-mono text-xs font-bold transition-all"
+                    >
+                        <i data-lucide="server" class="w-4 h-4"></i>
+                        <span>cfx.re/join/vqq7p6q</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Riga Crediti Developer: Powered by 111braian111 + icona Discord cliccabile -->
+            <div class="pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+                <span>© 2026 SIXM RP — Tutti i diritti riservati.</span>
+
+                <div class="flex flex-wrap items-center justify-center gap-2.5 px-4 py-2 rounded-2xl sm:rounded-full bg-[#0f131d] border border-slate-800/90 shadow-lg">
+                    <span class="text-slate-300 font-medium">Powered by <strong class="text-amber-300 font-bold">111braian111</strong></span>
+                    <span class="hidden sm:inline text-slate-700">•</span>
+                    <a 
+                        href="https://discord.gg/eSnzecWTpu" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#5865F2]/20 hover:bg-[#5865F2] border border-[#5865F2]/40 text-indigo-200 hover:text-white font-semibold transition-all duration-300 hover:scale-105 shadow-[0_0_16px_rgba(88,101,242,0.2)] hover:shadow-[0_0_24px_rgba(88,101,242,0.55)]"
+                        title="Entra nel Discord di 111braian111 per creare il tuo server"
+                        aria-label="Entra nel Discord di 111braian111 per creare il tuo server"
+                    >
+                        <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189Z"/>
+                        </svg>
+                        <span>Entra per creare il tuo server</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notifica Copia IP -->
+    <div id="copy-toast" class="fixed bottom-6 right-6 z-50 translate-y-24 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#111520] border border-amber-400/50 shadow-[0_10px_35px_rgba(0,0,0,0.75)] text-sm text-white">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <div class="font-bold text-amber-300 text-xs uppercase tracking-wider">Comando Copiato!</div>
+                <div class="font-mono text-xs text-slate-200">connect cfx.re/join/vqq7p6q</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Completo: Icone, Ricerca, Filtri, Simulatori, 3D Tilt & Scena Three.js -->
+    <script>
+        // Inizializza icone Lucide in modo sicuro (UMD usa createIcons)
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
+
+        // Copia comando di connessione negli appunti con fallback iframe-safe
+        function copyServerConnect() {
+            const cmd = 'connect cfx.re/join/vqq7p6q';
+            const textArea = document.createElement('textarea');
+            textArea.value = cmd;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showCopyToast();
+            } catch (err) {
+                console.error('Errore copia:', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        let toastTimeout;
+        function showCopyToast() {
+            const toast = document.getElementById('copy-toast');
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3200);
+        }
+
+        // Ricerca Live & Filtri Sezione
+        const searchInput = document.getElementById('rule-search');
+        const clearBtn = document.getElementById('clear-search');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const sections = document.querySelectorAll('.rule-section');
+        const resultsCounter = document.getElementById('results-counter');
+        const emptyState = document.getElementById('empty-state');
+
+        let activeFilter = 'all';
+
+        // Salva testo originale per evidenziazione sicura
+        document.querySelectorAll('.searchable-text').forEach(el => {
+            el.dataset.origHtml = el.innerHTML;
+        });
+
+        function applyFilters() {
+            const query = searchInput.value.trim().toLowerCase();
+            clearBtn.classList.toggle('hidden', query === '' && activeFilter === 'all');
+
+            let visibleSectionsCount = 0;
+
+            sections.forEach(sec => {
+                const secId = sec.dataset.section;
+                const matchesCategory = (activeFilter === 'all' || activeFilter === secId);
+
+                // Ripristina HTML originale prima di applicare evidenziazione
+                sec.querySelectorAll('.searchable-text').forEach(el => {
+                    el.innerHTML = el.dataset.origHtml;
+                });
+
+                if (!matchesCategory) {
+                    sec.classList.add('hidden');
+                    return;
+                }
+
+                if (query === '') {
+                    sec.classList.remove('hidden');
+                    sec.querySelectorAll('.rule-item').forEach(item => item.classList.remove('hidden'));
+                    visibleSectionsCount++;
+                    return;
+                }
+
+                const sectionText = sec.textContent.toLowerCase();
+                if (sectionText.includes(query)) {
+                    sec.classList.remove('hidden');
+                    visibleSectionsCount++;
+
+                    // Filtra i singoli elementi dentro la sezione se ce ne sono
+                    const items = sec.querySelectorAll('.rule-item');
+                    let anyItemVisible = false;
+                    items.forEach(item => {
+                        if (item.textContent.toLowerCase().includes(query)) {
+                            item.classList.remove('hidden');
+                            anyItemVisible = true;
+                        } else {
+                            item.classList.add('hidden');
+                        }
+                    });
+                    if (!anyItemVisible) {
+                        items.forEach(item => item.classList.remove('hidden'));
+                    }
+
+                    // Evidenzia corrispondenze testuali
+                    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${escaped})`, 'gi');
+                    sec.querySelectorAll('.searchable-text').forEach(el => {
+                        el.innerHTML = el.dataset.origHtml.replace(/(<[^>]+>)|([^<]+)/g, (match, tag, text) => {
+                            if (tag) return tag;
+                            return text.replace(regex, '<mark class="search-hl">$1</mark>');
+                        });
+                    });
+                } else {
+                    sec.classList.add('hidden');
+                }
+            });
+
+            emptyState.classList.toggle('hidden', visibleSectionsCount > 0);
+            resultsCounter.textContent = visibleSectionsCount === 1
+                ? '1 Sezione Visibile'
+                : `${visibleSectionsCount} Sezioni Visibili`;
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                activeFilter = btn.dataset.filter;
+                filterBtns.forEach(b => {
+                    b.classList.remove('active', 'bg-amber-500', 'text-slate-950', 'font-bold');
+                    b.classList.add('bg-[#121622]', 'text-slate-300', 'font-semibold');
+                });
+                btn.classList.add('active', 'bg-amber-500', 'text-slate-950', 'font-bold');
+                btn.classList.remove('bg-[#121622]', 'text-slate-300', 'font-semibold');
+                applyFilters();
+            });
+        });
+
+        function resetFilters() {
+            searchInput.value = '';
+            activeFilter = 'all';
+            filterBtns.forEach(b => {
+                b.classList.remove('active', 'bg-amber-500', 'text-slate-950', 'font-bold');
+                b.classList.add('bg-[#121622]', 'text-slate-300', 'font-semibold');
+            });
+            filterBtns[0].classList.add('active', 'bg-amber-500', 'text-slate-950', 'font-bold');
+            filterBtns[0].classList.remove('bg-[#121622]', 'text-slate-300', 'font-semibold');
+            applyFilters();
+        }
+
+        // Simulatore Interattivo Sequenza Alt negli Inseguimenti
+        let altSimTimers = [];
+        function simulateAltSequence() {
+            altSimTimers.forEach(t => clearTimeout(t));
+            altSimTimers = [];
+
+            const steps = document.querySelectorAll('.alt-step');
+            const progressBar = document.getElementById('alt-progress-bar');
+            const statusLabel = document.getElementById('alt-status-label');
+            const timerBadge = document.getElementById('alt-timer-badge');
+            const ticks = [
+                document.getElementById('alt-tick-1'),
+                document.getElementById('alt-tick-2'),
+                document.getElementById('alt-tick-3'),
+                document.getElementById('alt-tick-4')
+            ];
+
+            // Reset iniziale barra e card
+            steps.forEach(s => {
+                s.classList.remove(
+                    'border-amber-400', 'border-rose-500',
+                    'bg-amber-500/15', 'bg-rose-500/20',
+                    'shadow-[0_0_28px_rgba(245,158,11,0.35)]',
+                    'shadow-[0_0_32px_rgba(244,63,94,0.45)]',
+                    'scale-[1.03]'
+                );
+            });
+            ticks.forEach(tk => tk && tk.classList.remove('text-amber-300', 'text-rose-400', 'font-bold'));
+            if (progressBar) progressBar.style.width = '0%';
+            if (timerBadge) timerBadge.textContent = '00:00 / 01:00';
+            if (statusLabel) statusLabel.innerHTML = '<span class="text-amber-300">Inseguimento avviato...</span>';
+
+            const phaseData = [
+                { width: '25%', time: '00:10 / 01:00', text: '<strong class="text-amber-300">ALT 1 INTIMATO</strong> (+10s dall\'inizio)' },
+                { width: '50%', time: '00:25 / 01:00', text: '<strong class="text-amber-300">ALT 2 INTIMATO</strong> (+15s dal primo Alt)' },
+                { width: '75%', time: '00:40 / 01:00', text: '<strong class="text-amber-300">ALT 3 INTIMATO</strong> (+15s dal secondo Alt)' },
+                { width: '100%', time: '01:00 / 01:00', text: '<strong class="text-rose-400">MANOVRE AUTORIZZATE: PIT / GRAPPLER</strong> (+20s dall\'Alt 3)' }
+            ];
+
+            steps.forEach((step, index) => {
+                const timer = setTimeout(() => {
+                    const phase = phaseData[index];
+                    if (progressBar) progressBar.style.width = phase.width;
+                    if (timerBadge) timerBadge.textContent = phase.time;
+                    if (statusLabel) statusLabel.innerHTML = phase.text;
+
+                    if (index === 3) {
+                        step.classList.add('border-rose-500', 'bg-rose-500/20', 'shadow-[0_0_32px_rgba(244,63,94,0.45)]', 'scale-[1.03]');
+                        if (ticks[index]) ticks[index].classList.add('text-rose-400', 'font-bold');
+                    } else {
+                        step.classList.add('border-amber-400', 'bg-amber-500/15', 'shadow-[0_0_28px_rgba(245,158,11,0.35)]', 'scale-[1.03]');
+                        if (ticks[index]) ticks[index].classList.add('text-amber-300', 'font-bold');
+                    }
+                }, (index + 1) * 600);
+                altSimTimers.push(timer);
+            });
+        }
+
+        // Simulatore Fedina Penale Permajail (5 Reati Gravi)
+        let seriousCrimes = 5;
+        function adjustCrimes(delta) {
+            seriousCrimes = Math.max(0, Math.min(7, seriousCrimes + delta));
+            const badge = document.getElementById('crime-count-badge');
+            const bars = document.getElementById('crime-bars').children;
+            const status = document.getElementById('crime-status-text');
+
+            badge.textContent = `${seriousCrimes} / 5 Reati Gravi`;
+
+            for (let i = 0; i < 5; i++) {
+                bars[i].className = 'h-2.5 rounded-full transition-all ' + (
+                    i < seriousCrimes
+                        ? (seriousCrimes >= 5 && i === 4 ? 'bg-rose-500' : 'bg-amber-500')
+                        : 'bg-slate-800'
+                );
+            }
+
+            if (seriousCrimes >= 5) {
+                status.className = 'text-xs font-mono text-rose-300';
+                status.textContent = `SOGLIA RAGGIUNTA (${seriousCrimes} reati gravi provati in RP): È possibile avviare il processo per Permajail / Pena di Morte.`;
+            } else {
+                status.className = 'text-xs font-mono text-amber-300';
+                status.textContent = `SOGLIA NON RAGGIUNTA (${seriousCrimes}/5 reati gravi): Mancano ancora ${5 - seriousCrimes} reati gravi documentati per richiedere Permajail / Pena di Morte.`;
+            }
+        }
+
+        // Effetto 3D Tilt & Riflesso sulle Card
+        document.querySelectorAll('.tilt-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -2.2;
+                const rotateY = ((x - centerX) / centerX) * 2.2;
+                card.style.transform = `perspective(1100px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg)';
+            });
+        });
+
+        // Scroll Reveal
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.08 });
+
+        document.querySelectorAll('.reveal-section').forEach(sec => revealObserver.observe(sec));
+
+        // Scena 3D Interattiva Three.js nella Hero (Nucleo 6M Dorato, Anelli Giroscopici, Città Wireframe & Particelle)
+        function initHeroThreeScene() {
+            const container = document.getElementById('three-hero-container');
+            if (!container || typeof THREE === 'undefined') return;
+
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x08090c, 0.045);
+
+            const camera = new THREE.PerspectiveCamera(
+                52,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                100
+            );
+            camera.position.set(0, 1.8, 12);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Luci per il materiale 3D Standard
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            const goldLight = new THREE.PointLight(0xfbbf24, 2.2, 30);
+            goldLight.position.set(5, 6, 8);
+            scene.add(goldLight);
+
+            // Gruppo centrale per il nucleo 3D e gli anelli giroscopici
+            const coreGroup = new THREE.Group();
+            coreGroup.position.set(0, 0.5, -1.5);
+            scene.add(coreGroup);
+
+            // Emblema 3D "6M" creato con canvas texture + artwork ufficiale SixM
+            const emblemCanvas = document.createElement('canvas');
+            emblemCanvas.width = 512;
+            emblemCanvas.height = 512;
+            const ctx = emblemCanvas.getContext('2d');
+
+            function drawFallbackEmblem() {
+                ctx.fillStyle = '#0c0e14';
+                ctx.fillRect(0, 0, 512, 512);
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 14;
+                ctx.strokeRect(24, 24, 464, 464);
+
+                const grad = ctx.createLinearGradient(0, 120, 512, 390);
+                grad.addColorStop(0, '#fef3c7');
+                grad.addColorStop(0.5, '#fbbf24');
+                grad.addColorStop(1, '#b45309');
+                ctx.fillStyle = grad;
+                ctx.font = '900 220px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('6M', 256, 268);
+            }
+
+            drawFallbackEmblem();
+            const emblemTex = new THREE.CanvasTexture(emblemCanvas);
+
+            const bannerImg = new Image();
+            bannerImg.onload = () => {
+                const s = Math.min(bannerImg.width, bannerImg.height);
+                const sx = (bannerImg.width - s) / 2;
+                const sy = (bannerImg.height - s) / 2;
+                ctx.drawImage(bannerImg, sx, sy, s, s, 0, 0, 512, 512);
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 16;
+                ctx.strokeRect(8, 8, 496, 496);
+                emblemTex.needsUpdate = true;
+            };
+            bannerImg.src = 'image_5da123.jpg';
+
+            const coreGeo = new THREE.BoxGeometry(2.3, 2.3, 2.3);
+            const coreMat = new THREE.MeshStandardMaterial({
+                map: emblemTex,
+                metalness: 0.75,
+                roughness: 0.25,
+                emissive: 0x78350f,
+                emissiveIntensity: 0.35
+            });
+            const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+            coreGroup.add(coreMesh);
+
+            // Anelli Giroscopici Dorati
+            const ringMat1 = new THREE.MeshBasicMaterial({ color: 0xfbbf24, wireframe: true, transparent: true, opacity: 0.45 });
+            const ring1 = new THREE.Mesh(new THREE.TorusGeometry(2.7, 0.05, 12, 64), ringMat1);
+            coreGroup.add(ring1);
+
+            const ringMat2 = new THREE.MeshBasicMaterial({ color: 0xf59e0b, wireframe: true, transparent: true, opacity: 0.35 });
+            const ring2 = new THREE.Mesh(new THREE.TorusGeometry(3.35, 0.04, 12, 64), ringMat2);
+            ring2.rotation.x = Math.PI / 3;
+            coreGroup.add(ring2);
+
+            const ringMat3 = new THREE.MeshBasicMaterial({ color: 0xfde68a, wireframe: true, transparent: true, opacity: 0.25 });
+            const ring3 = new THREE.Mesh(new THREE.TorusGeometry(4.0, 0.03, 12, 64), ringMat3);
+            ring3.rotation.y = Math.PI / 4;
+            coreGroup.add(ring3);
+
+            // Griglia Urbana Wireframe Notturna
+            const gridHelper = new THREE.GridHelper(50, 44, 0xf59e0b, 0x1e2433);
+            gridHelper.position.y = -3.4;
+            gridHelper.material.transparent = true;
+            gridHelper.material.opacity = 0.28;
+            scene.add(gridHelper);
+
+            // Palazzi Skyline Wireframe ai lati
+            const cityGroup = new THREE.Group();
+            const buildingMat = new THREE.MeshBasicMaterial({
+                color: 0xf59e0b,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.14
+            });
+            for (let i = 0; i < 28; i++) {
+                const w = 0.9 + Math.random() * 1.4;
+                const h = 2.0 + Math.random() * 5.5;
+                const d = 0.9 + Math.random() * 1.4;
+                const bMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), buildingMat);
+                const side = i % 2 === 0 ? 1 : -1;
+                bMesh.position.set(
+                    side * (5.5 + Math.random() * 11),
+                    -3.4 + h / 2,
+                    -2 - Math.random() * 16
+                );
+                cityGroup.add(bMesh);
+            }
+            scene.add(cityGroup);
+
+            // Particelle Dorate Fluttuanti
+            const particleCount = 220;
+            const particleGeo = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 28;
+                positions[i + 1] = (Math.random() - 0.5) * 14;
+                positions[i + 2] = (Math.random() - 0.5) * 20;
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particleMat = new THREE.PointsMaterial({
+                color: 0xfbbf24,
+                size: 0.08,
+                transparent: true,
+                opacity: 0.7
+            });
+            const particles = new THREE.Points(particleGeo, particleMat);
+            scene.add(particles);
+
+            // Parallasse Mouse
+            let targetMouseX = 0;
+            let targetMouseY = 0;
+            window.addEventListener('mousemove', (e) => {
+                targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+
+            // Resize Responsivo
+            window.addEventListener('resize', () => {
+                if (!container) return;
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+            // Loop di Animazione
+            function animate() {
+                requestAnimationFrame(animate);
+
+                coreMesh.rotation.y += 0.008;
+                coreMesh.rotation.x = Math.sin(Date.now() * 0.001) * 0.15;
+
+                ring1.rotation.x += 0.01;
+                ring1.rotation.y += 0.007;
+
+                ring2.rotation.y -= 0.012;
+                ring2.rotation.z += 0.006;
+
+                ring3.rotation.x -= 0.007;
+                ring3.rotation.z -= 0.009;
+
+                particles.rotation.y += 0.0015;
+
+                camera.position.x += (targetMouseX * 1.4 - camera.position.x) * 0.05;
+                camera.position.y += (1.8 - targetMouseY * 0.8 - camera.position.y) * 0.05;
+                camera.lookAt(0, 0.5, -1.5);
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+
+        window.addEventListener('load', initHeroThreeScene);
+    </script>
+</body>
+</html>
